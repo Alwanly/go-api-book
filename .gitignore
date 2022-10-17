@@ -3,5 +3,5 @@
 
 /tmp
 
-/.air*
+.air.*
 /docs*

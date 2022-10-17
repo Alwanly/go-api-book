@@ -2,7 +2,7 @@ run:
 	go run main.go
 
 test:
-	go test -v ./...
+	go test -v ./domain/... ./infrastructure/...
 
 dev:
 	air
