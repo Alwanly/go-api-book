@@ -1,11 +1,11 @@
 package users
 
 import (
-	"books-api/infrastructure/authentication"
-	"books-api/infrastructure/redis"
-	"books-api/infrastructure/utils"
 	"context"
 	"errors"
+	"go-codebase/infrastructure/authentication"
+	"go-codebase/infrastructure/redis"
+	"go-codebase/infrastructure/utils"
 	"net/http"
 	"strconv"
 

@@ -1,11 +1,11 @@
 package book
 
 import (
-	"books-api/domain/users"
-	"books-api/infrastructure/authentication"
-	"books-api/infrastructure/utils"
 	"context"
 	"errors"
+	"go-codebase/domain/users"
+	"go-codebase/infrastructure/authentication"
+	"go-codebase/infrastructure/utils"
 	"math"
 	"net/http"
 

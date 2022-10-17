@@ -1,9 +1,9 @@
 package database
 
 import (
-	"books-api/domain/book"
-	"books-api/domain/users"
-	"books-api/infrastructure/config"
+	"go-codebase/domain/book"
+	"go-codebase/domain/users"
+	"go-codebase/infrastructure/config"
 	"log"
 
 	"gorm.io/gorm"

@@ -1,4 +1,4 @@
-module books-api
+module go-codebase
 
 go 1.19
 

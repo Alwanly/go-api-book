@@ -1,21 +1,21 @@
 package main
 
 import (
-	"books-api/domain/book"
-	"books-api/domain/users"
-	"books-api/infrastructure/authentication"
-	"books-api/infrastructure/config"
-	"books-api/infrastructure/database"
-	"books-api/infrastructure/redis"
 	"context"
 	"fmt"
+	"go-codebase/domain/book"
+	"go-codebase/domain/users"
+	"go-codebase/infrastructure/authentication"
+	"go-codebase/infrastructure/config"
+	"go-codebase/infrastructure/database"
+	"go-codebase/infrastructure/redis"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	docs "books-api/docs"
+	docs "go-codebase/docs"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

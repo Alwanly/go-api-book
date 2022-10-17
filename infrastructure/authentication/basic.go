@@ -1,9 +1,9 @@
 package authentication
 
 import (
-	"books-api/infrastructure/config"
-	"books-api/infrastructure/utils"
 	"encoding/base64"
+	"go-codebase/infrastructure/config"
+	"go-codebase/infrastructure/utils"
 	"net/http"
 	"strings"
 

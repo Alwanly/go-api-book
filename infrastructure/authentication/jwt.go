@@ -1,9 +1,9 @@
 package authentication
 
 import (
-	"books-api/infrastructure/config"
-	"books-api/infrastructure/utils"
 	"fmt"
+	"go-codebase/infrastructure/config"
+	"go-codebase/infrastructure/utils"
 	"net/http"
 	"strings"
 	"time"

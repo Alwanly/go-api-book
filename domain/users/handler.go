@@ -1,10 +1,10 @@
 package users
 
 import (
-	"books-api/infrastructure/authentication"
+	"go-codebase/infrastructure/authentication"
 	"net/http"
 
-	"books-api/infrastructure/utils"
+	"go-codebase/infrastructure/utils"
 
 	"github.com/gin-gonic/gin"
 )

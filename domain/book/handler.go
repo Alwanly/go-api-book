@@ -1,8 +1,8 @@
 package book
 
 import (
-	"books-api/infrastructure/authentication"
-	"books-api/infrastructure/utils"
+	"go-codebase/infrastructure/authentication"
+	"go-codebase/infrastructure/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
