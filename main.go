@@ -6,6 +6,7 @@ import (
 	"books-api/infrastructure/authentication"
 	"books-api/infrastructure/config"
 	"books-api/infrastructure/database"
+	"books-api/infrastructure/redis"
 	"context"
 	"fmt"
 	"log"
@@ -14,8 +15,13 @@ import (
 	"os/signal"
 	"time"
 
+	docs "books-api/docs"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.elastic.co/apm/module/apmgin"
 )
 
 func main() {
@@ -28,6 +34,8 @@ func main() {
 
 	db, err := database.Initialize()
 
+	cache, err := redis.Initialize()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,11 +47,26 @@ func main() {
 
 	router := gin.New()
 
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 	}))
 
-	userUseCase := users.ConstructUserUseCase(db, jwtAuth)
+	if config.GlobalConfig.Apm.Active {
+		log.Println(config.GlobalConfig.Apm.Active)
+		router.Use(apmgin.Middleware(router))
+	}
+
+	// swagger
+	docs.SwaggerInfo.BasePath = "/api/basic"
+	router.GET("", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	userUseCase := users.ConstructUserUseCase(db, jwtAuth, cache)
 	users.ConstructUserHandler(router, userUseCase, jwtAuth)
 
 	bookUseCase := book.ConstructBookUseCase(db, jwtAuth)

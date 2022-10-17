@@ -18,12 +18,21 @@ func ConstructUserHandler(router *gin.Engine, usecase UserUseCase, jwtAuth authe
 		UseCase: usecase,
 	}
 
-	v1 := router.Group("/api/v1/users")
+	v1 := router.Group("/api/v1/user")
 	v1.POST("/login", authentication.BasicAuthMiddleware(), handler.Login)
 	v1.POST("/register", authentication.BasicAuthMiddleware(), handler.Register)
 	return *handler
 }
 
+// login godoc
+// @Summary      Login
+// @Description  Authenticate a user to get access token
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Param        data body LoginModel true "LoginModel data"
+// @Router       /v1/user/login [post]
+// @Security     BasicAuth
 func (u *UserHandler) Login(c *gin.Context) {
 	var model LoginModel
 	if err := c.ShouldBindJSON(&model); err != nil {

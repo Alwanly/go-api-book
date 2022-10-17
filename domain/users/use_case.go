@@ -2,6 +2,7 @@ package users
 
 import (
 	"books-api/infrastructure/authentication"
+	"books-api/infrastructure/redis"
 	"books-api/infrastructure/utils"
 	"context"
 	"errors"
@@ -19,16 +20,19 @@ type UserUseCase interface {
 type UserUseCaseImpl struct {
 	Database *gorm.DB
 	JwtAuth  authentication.IJwtAuth
+	Cache    redis.Icache
 }
 
-func ConstructUserUseCase(db *gorm.DB, jwtAuth authentication.IJwtAuth) UserUseCase {
+func ConstructUserUseCase(db *gorm.DB, jwtAuth authentication.IJwtAuth, cache redis.Icache) UserUseCase {
 	return &UserUseCaseImpl{
 		Database: db,
 		JwtAuth:  jwtAuth,
+		Cache:    cache,
 	}
 }
 
 func (u *UserUseCaseImpl) Sign(c context.Context, model LoginModel) utils.BaseResponse {
+
 	db := u.Database.WithContext(c)
 	var user Users
 	dbResult := db.First(&user, "email = ? ", model.Email)
@@ -45,6 +49,8 @@ func (u *UserUseCaseImpl) Sign(c context.Context, model LoginModel) utils.BaseRe
 	response := UserLoginDto{
 		Token: accessToken,
 	}
+	defer u.Cache.Set(c, strconv.Itoa(int(user.ID)), response, 1000)
+
 	return utils.WrapperReponse(http.StatusOK, "User Registered", response)
 
 }
