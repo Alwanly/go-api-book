@@ -2,13 +2,13 @@ package redis
 
 import (
 	"context"
-	"go-codebase/infrastructure/logger"
+	"go-codebase/pkg/logger"
 
 	"github.com/go-redis/redis/v9"
 	"go.uber.org/zap"
 )
 
-func NewRedis(opts *DBServiceOpts) (IDBService, error) {
+func NewRedis(opts *RedisOpts) (IRedisService, error) {
 	l := logger.WithId(opts.Logger, ContextName, "NewRedis")
 
 	if opts.RedisUri == nil {
@@ -30,12 +30,12 @@ func NewRedis(opts *DBServiceOpts) (IDBService, error) {
 		return nil, res.Err()
 	}
 
-	return &DBService{
+	return &RedisService{
 		Redis: cl,
 	}, nil
 }
 
-func (db *DBService) PingRedis() bool {
+func (db *RedisService) PingRedis() bool {
 	l := logger.NewLogger(ContextName, "PingRedis")
 	ctx, cancel := context.WithTimeout(context.Background(), PingTimeout)
 	defer cancel()
@@ -47,7 +47,7 @@ func (db *DBService) PingRedis() bool {
 	return res.Err() == nil
 }
 
-func (db *DBService) PingRedisWithError() (bool, error) {
+func (db *RedisService) PingRedisWithError() (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), PingTimeout)
 	defer cancel()
 

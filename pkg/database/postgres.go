@@ -8,8 +8,6 @@ import (
 	"math"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -38,16 +36,6 @@ func NewPostgres(opts *DBServiceOpts) (IDBService, error) {
 		opts.ApplicationName = utils.ToPointer(TracePostgresServiceName)
 	} else {
 		opts.ApplicationName = utils.ToPointer(fmt.Sprintf("%s_postgres", *opts.ApplicationName))
-	}
-
-	// register instrumentation
-	// sqltrace.Register("pgx", &stdlib.Driver{}, sqltrace.WithServiceName(*opts.ApplicationName))
-
-	// create connection
-	_, err := pgxpool.Connect(context.Background(), *opts.PostgresUri)
-	if err != nil {
-		l.Error("Cannot open database connection", zap.Error(err))
-		return nil, err
 	}
 
 	// create logger

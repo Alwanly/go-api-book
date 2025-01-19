@@ -14,7 +14,7 @@ const (
 )
 
 // DBServiceOpts represents the options for configuring the database service.
-type DBServiceOpts struct {
+type RedisOpts struct {
 	// Debug enables debug mode.
 	Debug bool
 	// Logger is the logger.
@@ -28,12 +28,12 @@ type DBServiceOpts struct {
 }
 
 // DBService represents the database service.
-type DBService struct {
+type RedisService struct {
 	Redis redis.UniversalClient
 }
 
 // IDBService represents the interface for the database service.
-type IDBService interface {
+type IRedisService interface {
 
 	// ---- Redis
 
