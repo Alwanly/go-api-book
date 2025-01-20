@@ -8,11 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type ContextTransaction string
+type (
+	ContextTransaction string
 
-const ContextName = "Components.Database"
+	OptFunc func(opts *DBServiceOpts) error
+)
 
 const (
+	ContextName = "Components.Database"
 	PingTimeout = 10 * time.Second
 )
 
@@ -23,11 +26,11 @@ type DBServiceOpts struct {
 	// Logger is the logger.
 	Logger *zap.Logger
 
-	// PostgresSQL database connection string (DSN)
-	PostgresUri *string
-	// Maximun number of open connections to the database. Default is 10.
+	// PostgresSQL database connection strings (DSNs)
+	postgresUri *string
+	// Maximum number of open connections to the database. Default is 10.
 	PostgresMaxOpenConnections int
-	// Maximun number of idle connections to the database. Default is 5.
+	// Maximum number of idle connections to the database. Default is 5.
 	PostgresMaxIdleConnections int
 
 	// Application Name (for tracing)
@@ -112,4 +115,21 @@ type IDBService interface {
 	// Returns:
 	//   - *string: lock type
 	GetLockType(c context.Context) *string
+
+	// Defer defers the transaction attached to the context.
+	//
+	// Parameters:
+	//   - c: context
+	Defer(c context.Context)
+
+	// Close closes the database connection.
+	Close() error
+}
+
+// set config for uri
+func SetPostgresUri(uri string) OptFunc {
+	return func(opts *DBServiceOpts) error {
+		opts.postgresUri = &uri
+		return nil
+	}
 }

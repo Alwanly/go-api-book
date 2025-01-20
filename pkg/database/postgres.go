@@ -27,7 +27,7 @@ const (
 func NewPostgres(opts *DBServiceOpts) (IDBService, error) {
 	l := logger.WithId(opts.Logger, ContextName, "NewPostgres")
 
-	if opts.PostgresUri == nil {
+	if opts.postgresUri == nil {
 		l.Debug("Postgres URI is not set, skipping")
 		return nil, nil
 	}
@@ -44,7 +44,7 @@ func NewPostgres(opts *DBServiceOpts) (IDBService, error) {
 	}
 
 	dialector := postgres.New(postgres.Config{
-		DSN:                  *opts.PostgresUri,
+		DSN:                  *opts.postgresUri,
 		PreferSimpleProtocol: true,
 	})
 
@@ -148,4 +148,13 @@ func (db *DBService) RollbackTransaction(ctx context.Context) *gorm.DB {
 func (db *DBService) CommitTransaction(ctx context.Context) *gorm.DB {
 	tx := ctx.Value(TransactionContextKey).(*gorm.DB)
 	return tx.Commit()
+}
+
+func (db *DBService) Close() error {
+	sqlDB, err := db.Gorm.DB()
+	if err != nil {
+		return err
+	}
+
+	return sqlDB.Close()
 }

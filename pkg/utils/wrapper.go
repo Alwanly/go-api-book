@@ -3,6 +3,8 @@ package utils
 import (
 	"math"
 	"net/http"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type JSONResult struct {
@@ -57,4 +59,27 @@ func ResponsePagination(page int, limit int, count int, total int, data interfac
 			MetaData:        metaData,
 		},
 	}
+}
+
+func ResponseUnauthorized(c *fiber.Ctx, challenge string, message ...string) error {
+	c.Set("WWW-Authenticate", "Basic realm=Restricted")
+	response := fiber.Map{
+		"message": message[0],
+	}
+	if len(message) > 1 {
+		response["statusCode"] = message[1]
+	}
+	return c.Status(http.StatusUnauthorized).JSON(response)
+}
+
+func ResponseForbidden(c *fiber.Ctx, challenge string, message string) error {
+	return c.Status(http.StatusForbidden).JSON(fiber.Map{
+		"message": message,
+	})
+}
+
+func ResponseInternalServerError(c *fiber.Ctx, message string) error {
+	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+		"message": message,
+	})
 }
