@@ -54,3 +54,11 @@ func (db *RedisService) PingRedisWithError() (bool, error) {
 	res := db.Redis.Ping(ctx)
 	return res.Err() == nil, res.Err()
 }
+
+func (db *RedisService) CloseRedis() error {
+	return db.Redis.Close()
+}
+
+func (db *RedisService) GetTransaction() (redis.Pipeliner, error) {
+	return db.Redis.TxPipeline(), nil
+}

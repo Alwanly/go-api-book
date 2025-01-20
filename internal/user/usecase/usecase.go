@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"go-codebase/internal/user/repository"
 	"go-codebase/pkg/authentication"
 	"go-codebase/pkg/config"
 
@@ -11,9 +12,10 @@ const ContextName = "Internal.User.Usecase"
 
 type (
 	UseCase struct {
-		Config *config.GlobalConfig
-		Logger *zap.Logger
-		Jwt    authentication.IJwtService
+		Config     *config.GlobalConfig
+		Logger     *zap.Logger
+		Jwt        authentication.IJwtService
+		Repository repository.IRepository
 	}
 
 	IUseCase interface {
@@ -29,9 +31,11 @@ func NewUseCase(uc UseCase) IUseCase {
 	}
 }
 
-func (uc *UseCase) ExampleMethod() error {
-	uc.Jwt.GenerateToken(authentication.JWTClaims{
+func (u *UseCase) ExampleMethod() error {
+	u.Jwt.GenerateToken(authentication.JWTClaims{
 		UserID: "123",
 	})
+
+	u.Repository.ExampleMethod()
 	return nil
 }

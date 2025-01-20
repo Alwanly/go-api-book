@@ -36,7 +36,7 @@ type RedisService struct {
 type IRedisService interface {
 
 	// ---- Redis
-
+	GetTransaction() (redis.Pipeliner, error)
 	// PingRedis pings the Redis database to check if it's available.
 	//
 	// Returns:
@@ -49,4 +49,7 @@ type IRedisService interface {
 	//   - bool: true if the database is available, false otherwise.
 	//   - error: error stack trace.
 	PingRedisWithError() (bool, error)
+
+	// CloseRedis closes the Redis database connection.
+	CloseRedis() error
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"go-codebase/internal/user/repository"
 	"go-codebase/internal/user/usecase"
 	"go-codebase/pkg/deps"
 	"go-codebase/pkg/validator"
@@ -19,10 +20,15 @@ type (
 
 func NewHandler(d *deps.App) *Handler {
 
+	repository := repository.NewRepository(repository.Repository{
+		DB:    d.DB,
+		Redis: d.Redis,
+	})
 	usecase := usecase.NewUseCase(usecase.UseCase{
-		Config: d.Config,
-		Logger: d.Logger,
-		Jwt:    d.Auth.Jwt,
+		Config:     d.Config,
+		Logger:     d.Logger,
+		Jwt:        d.Auth.Jwt,
+		Repository: repository,
 	})
 	handler := &Handler{
 		Logger:    d.Logger,
