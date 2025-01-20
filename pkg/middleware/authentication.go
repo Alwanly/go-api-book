@@ -16,9 +16,9 @@ type IAuthMiddleware interface {
 	BasicAuth() fiber.Handler
 }
 
-type authMiddleware struct {
-	jwt       authentication.IJwtService
-	basicAuth authentication.IBasicAuthService
+type AuthMiddleware struct {
+	Jwt   authentication.IJwtService
+	Basic authentication.IBasicAuthService
 }
 
 type authOpts struct {
@@ -54,7 +54,7 @@ func SetBasicAuth(basicAuthConfig authentication.BasicAuthTConfig) AuthConfig {
 	}
 }
 
-func NewAuthMiddleware(opts ...AuthConfig) IAuthMiddleware {
+func NewAuthMiddleware(opts ...AuthConfig) *AuthMiddleware {
 	var o authOpts
 	for _, opt := range opts {
 		opt(&o)
@@ -76,13 +76,13 @@ func NewAuthMiddleware(opts ...AuthConfig) IAuthMiddleware {
 		Password: o.password,
 	}
 	basicAuth := authentication.NewBasicAuthService(*basicAuthOpts)
-	return &authMiddleware{
-		jwt:       jwtAuth,
-		basicAuth: basicAuth,
+	return &AuthMiddleware{
+		Jwt:   jwtAuth,
+		Basic: basicAuth,
 	}
 }
 
-func (a *authMiddleware) JwtAuth() fiber.Handler {
+func (a *AuthMiddleware) JwtAuth() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
 		// get token from header
@@ -98,7 +98,7 @@ func (a *authMiddleware) JwtAuth() fiber.Handler {
 		}
 
 		// parse token
-		auth, err := a.jwt.ParseToken(token)
+		auth, err := a.Jwt.ParseToken(token)
 		if err != nil {
 			return utils.ResponseUnauthorized(ctx, "Bearer", "Invalid token")
 		}
@@ -110,7 +110,7 @@ func (a *authMiddleware) JwtAuth() fiber.Handler {
 	}
 }
 
-func (a *authMiddleware) BasicAuth() fiber.Handler {
+func (a *AuthMiddleware) BasicAuth() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
 		// get auth from header
@@ -120,8 +120,8 @@ func (a *authMiddleware) BasicAuth() fiber.Handler {
 		}
 
 		// decode auth
-		username, password := a.basicAuth.DecodeFromHeader(auth)
-		if !a.basicAuth.Validate(username, password) {
+		username, password := a.Basic.DecodeFromHeader(auth)
+		if !a.Basic.Validate(username, password) {
 			return utils.ResponseUnauthorized(ctx, "Basic", "Invalid auth")
 		}
 		return ctx.Next()

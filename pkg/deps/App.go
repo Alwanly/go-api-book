@@ -3,6 +3,7 @@ package deps
 import (
 	"go-codebase/pkg/config"
 	"go-codebase/pkg/database"
+	"go-codebase/pkg/middleware"
 	"go-codebase/pkg/redis"
 	"go-codebase/pkg/validator"
 
@@ -13,9 +14,10 @@ import (
 type App struct {
 	Config    *config.GlobalConfig
 	Logger    *zap.Logger
-	DB        database.IDBService
-	Validator validator.IValidatorService
-	Redis     redis.IRedisService
+	DB        *database.DBService
+	Validator *validator.ValidatorService
+	Redis     *redis.RedisService
+	Auth      *middleware.AuthMiddleware
 
 	// APIs
 	Fiber *fiber.App

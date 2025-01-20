@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"go-codebase/pkg/authentication"
 	"go-codebase/pkg/config"
 	"go-codebase/pkg/database"
 	"go-codebase/pkg/logger"
+	"go-codebase/pkg/middleware"
+	"go-codebase/pkg/redis"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,17 +30,45 @@ func main() {
 	l := logger.WithId(globalLogger, "server", "main")
 	l.Info("Starting application")
 
+	// Setup database
 	dbConfig := database.DBServiceOpts{
 		Debug:  cfg.Debug,
 		Logger: globalLogger,
 	}
 
 	database.SetPostgresUri(cfg.PostgresUri)
-
 	db, err := database.NewPostgres(&dbConfig)
 	if err != nil {
 		l.Error("Cannot create database", zap.Error(err))
 		panic(err)
+	}
+
+	// Setup redis
+	redisConfig := redis.RedisOpts{
+		Logger:   globalLogger,
+		RedisUri: nil,
+	}
+	redis, err := redis.NewRedis(&redisConfig)
+	if err != nil {
+		l.Error("Cannot create redis", zap.Error(err))
+		panic(err)
+	}
+
+	// Setup middleware
+	jwtConfig := middleware.SetJwtAuth(authentication.JWTConfig{
+		Secret:   cfg.JwtPrivateKey,
+		Audience: cfg.JwtAudience,
+		Issuer:   cfg.JwtIssuer,
+	})
+	basicAuthConfig := middleware.SetBasicAuth(authentication.BasicAuthTConfig{
+		Username: cfg.BasicAuthUsername,
+		Password: cfg.BasicAuthPassword,
+	})
+
+	authMiddleware := middleware.NewAuthMiddleware(jwtConfig, basicAuthConfig)
+	if authMiddleware == nil {
+		l.Error("Cannot create auth middleware")
+		panic("Cannot create auth middleware")
 	}
 
 	// Create app
@@ -45,6 +76,8 @@ func main() {
 		Config: cfg,
 		Logger: globalLogger,
 		DB:     db,
+		Redis:  redis,
+		Auth:   authMiddleware,
 	})
 
 	// Register health check

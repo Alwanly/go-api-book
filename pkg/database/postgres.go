@@ -24,7 +24,7 @@ const (
 	TracePostgresServiceName                                 = "postgres"
 )
 
-func NewPostgres(opts *DBServiceOpts) (IDBService, error) {
+func NewPostgres(opts *DBServiceOpts) (*DBService, error) {
 	l := logger.WithId(opts.Logger, ContextName, "NewPostgres")
 
 	if opts.postgresUri == nil {

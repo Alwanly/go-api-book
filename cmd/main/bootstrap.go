@@ -18,8 +18,9 @@ type (
 	AppDeps struct {
 		Config *config.GlobalConfig
 		Logger *zap.Logger
-		DB     database.IDBService
-		Redis  redis.IRedisService
+		DB     *database.DBService
+		Redis  *redis.RedisService
+		Auth   *middleware.AuthMiddleware
 	}
 )
 
@@ -45,6 +46,7 @@ func Bootstrap(d *AppDeps) *deps.App {
 		Logger: d.Logger,
 		DB:     d.DB,
 		Redis:  d.Redis,
+		Auth:   d.Auth,
 		Fiber:  e,
 	}
 

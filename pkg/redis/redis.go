@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewRedis(opts *RedisOpts) (IRedisService, error) {
+func NewRedis(opts *RedisOpts) (*RedisService, error) {
 	l := logger.WithId(opts.Logger, ContextName, "NewRedis")
 
 	if opts.RedisUri == nil {
