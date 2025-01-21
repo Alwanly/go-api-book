@@ -9,8 +9,6 @@ import (
 )
 
 type BuilderOption struct {
-	UDPIP       string
-	UDPPort     int
 	PrettyPrint bool
 }
 
