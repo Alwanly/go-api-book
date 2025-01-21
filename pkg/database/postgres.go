@@ -3,10 +3,12 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"math"
 	"time"
 
+	"github.com/Alwanly/go-codebase/model"
 	"github.com/Alwanly/go-codebase/pkg/logger"
 	"github.com/Alwanly/go-codebase/pkg/utils"
 	"go.uber.org/zap"
@@ -166,4 +168,13 @@ func (db *DBService) Close() error {
 	}
 
 	return sqlDB.Close()
+}
+
+func MigrateIfNeed(db *gorm.DB) error {
+	log.Println("Running database migration if necessary...")
+	err := db.AutoMigrate(&model.Book{})
+	if err != nil {
+		return err
+	}
+	return nil
 }

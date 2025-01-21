@@ -23,7 +23,12 @@ format:
 	go fmt ./...
 
 test:
-	go test ./...
+	go test ./internal/... ./pkg/...
+
+coverage:
+	mkdir -p coverage
+	go test -coverprofile=coverage/coverage.out "./internal/..." "./pkg/..."
+	go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 
 # ---- generators

@@ -14,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/zap"
 
+	book_handler "github.com/Alwanly/go-codebase/internal/book/handler"
 	user_handler "github.com/Alwanly/go-codebase/internal/user/handler"
 )
 
@@ -55,7 +56,8 @@ func Bootstrap(d *AppDeps) *deps.App {
 		Fiber:     e,
 		Validator: v,
 	}
-
+	database.MigrateIfNeed(inst.DB.Gorm)
 	user_handler.NewHandler(inst)
+	book_handler.NewHandler(inst)
 	return inst
 }
