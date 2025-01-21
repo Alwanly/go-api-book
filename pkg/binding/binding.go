@@ -1,12 +1,13 @@
-package utils
+package binding
 
 import (
 	"net/http"
 	"reflect"
 
-	"github.com/Alwanly/go-codebase/pkg/common"
+	"github.com/Alwanly/go-codebase/pkg/contract"
 	"github.com/Alwanly/go-codebase/pkg/logger"
 	"github.com/Alwanly/go-codebase/pkg/middleware"
+	"github.com/Alwanly/go-codebase/pkg/wrapper"
 
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
@@ -21,11 +22,11 @@ type (
 		m   interface{}
 	}
 
-	BindingSource func(*Binder) error
+	Source func(*Binder) error
 
 	ModelBindingError struct {
 		Code         int
-		ResponseBody JSONResult
+		ResponseBody wrapper.JSONResult
 	}
 )
 
@@ -33,7 +34,7 @@ func (e *ModelBindingError) Error() string {
 	return "Failed to bind request body"
 }
 
-func BindFromBody() BindingSource {
+func BindFromBody() Source {
 	return func(b *Binder) error {
 		if err := b.ctx.BodyParser(b.m); err != nil {
 			b.l.Debug("Error when binding from body", zap.Error(err))
@@ -44,7 +45,7 @@ func BindFromBody() BindingSource {
 	}
 }
 
-func BindFromQuery() BindingSource {
+func BindFromQuery() Source {
 	return func(b *Binder) error {
 		if err := b.ctx.QueryParser(b.m); err != nil {
 			b.l.Debug("Error when binding from query string", zap.Error(err))
@@ -55,7 +56,7 @@ func BindFromQuery() BindingSource {
 	}
 }
 
-func BindFromParams() BindingSource {
+func BindFromParams() Source {
 	return func(b *Binder) error {
 		if err := b.ctx.ParamsParser(b.m); err != nil {
 			b.l.Debug("Error when binding from path params", zap.Error(err))
@@ -66,7 +67,7 @@ func BindFromParams() BindingSource {
 	}
 }
 
-func BindFromHeaders() BindingSource {
+func BindFromHeaders() Source {
 	return func(b *Binder) error {
 		if err := b.ctx.ReqHeaderParser(b.m); err != nil {
 			b.l.Debug("Error when binding from request headers", zap.Error(err))
@@ -77,7 +78,7 @@ func BindFromHeaders() BindingSource {
 	}
 }
 
-func BindModel(log *zap.Logger, c *fiber.Ctx, m interface{}, sources ...BindingSource) error {
+func BindModel(log *zap.Logger, c *fiber.Ctx, m interface{}, sources ...Source) error {
 	// create local logger
 	l := logger.WithID(log, ContextName, "BindModel")
 
@@ -92,7 +93,7 @@ func BindModel(log *zap.Logger, c *fiber.Ctx, m interface{}, sources ...BindingS
 	for _, source := range sources {
 		// execute binding
 		if err := source(binder); err != nil {
-			result := ResponseFailed(http.StatusBadRequest, common.StatusCodeBindingFailed, common.ErrorValidatePayload, nil)
+			result := wrapper.ResponseFailed(http.StatusBadRequest, contract.StatusCodeBindingFailed, contract.ErrorValidatePayload, nil)
 			return &ModelBindingError{
 				Code:         result.Code,
 				ResponseBody: result,

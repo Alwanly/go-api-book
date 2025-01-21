@@ -5,6 +5,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const ContextName = "Validator"
+
 type ValidationError struct {
 	Field   string      `json:"field"`
 	Value   interface{} `json:"value"`

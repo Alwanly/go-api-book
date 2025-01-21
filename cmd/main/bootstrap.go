@@ -8,7 +8,6 @@ import (
 	"github.com/Alwanly/go-codebase/pkg/deps"
 	"github.com/Alwanly/go-codebase/pkg/middleware"
 	"github.com/Alwanly/go-codebase/pkg/redis"
-	"github.com/Alwanly/go-codebase/pkg/utils"
 	"github.com/Alwanly/go-codebase/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -36,7 +35,7 @@ func Bootstrap(d *AppDeps) *deps.App {
 		DisableStartupMessage: true,
 		JSONEncoder:           json.Marshal,
 		JSONDecoder:           json.Unmarshal,
-		ErrorHandler:          utils.ResponseRecover(d.Logger),
+		ErrorHandler:          middleware.Recover(d.Logger),
 	})
 
 	// register middleware

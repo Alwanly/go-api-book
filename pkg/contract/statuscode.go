@@ -1,4 +1,4 @@
-package common
+package contract
 
 const (
 	// Common error messages

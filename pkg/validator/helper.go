@@ -1,37 +1,37 @@
-package utils
+package validator
 
 import (
 	"net/http"
 
-	"github.com/Alwanly/go-codebase/pkg/common"
+	"github.com/Alwanly/go-codebase/pkg/contract"
 	"github.com/Alwanly/go-codebase/pkg/logger"
-	"github.com/Alwanly/go-codebase/pkg/validator"
+	"github.com/Alwanly/go-codebase/pkg/wrapper"
 	"go.uber.org/zap"
 )
 
 type ModelValidationError struct {
 	Code         int
-	ResponseBody JSONResult
+	ResponseBody wrapper.JSONResult
 }
 
 func (e *ModelValidationError) Error() string {
 	return "Failed to validate request body"
 }
 
-func ValidateModel(log *zap.Logger, v validator.IValidatorService, m interface{}) error {
+func ValidateModel(log *zap.Logger, v IValidatorService, m interface{}) error {
 	// create local logger
 	l := logger.WithID(log, ContextName, "ValidateModelV2")
 
 	// try validate model
 	if err := v.ValidateStruct(m); err != nil {
 		// log error
-		l.Error(common.ErrorValidatePayload, zap.Error(err))
+		l.Error(contract.ErrorValidatePayload, zap.Error(err))
 
 		// translate error
 		localizedErr := v.TranslateError(err)
 
 		// return error
-		result := ResponseFailed(http.StatusBadRequest, common.StatusCodeValidationFailed, common.ErrorValidatePayload, localizedErr)
+		result := wrapper.ResponseFailed(http.StatusBadRequest, contract.StatusCodeValidationFailed, contract.ErrorValidatePayload, localizedErr)
 		return &ModelValidationError{
 			Code:         result.Code,
 			ResponseBody: result,

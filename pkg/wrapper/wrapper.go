@@ -1,20 +1,18 @@
-package utils
+package wrapper
 
 import (
 	"math"
 	"net/http"
 
-	"github.com/Alwanly/go-codebase/pkg/common"
-	"github.com/gofiber/fiber/v2"
-	"go.uber.org/zap"
+	"github.com/Alwanly/go-codebase/pkg/contract"
 )
 
 type JSONResult struct {
-	Code       int               `json:"-"`
-	StatusCode common.StatusCode `json:"statusCode"`
-	Message    string            `json:"message"`
-	Meta       *PaginationMeta   `json:"meta,omitempty"`
-	Data       interface{}       `json:"data"`
+	Code       int                 `json:"-"`
+	StatusCode contract.StatusCode `json:"statusCode"`
+	Message    string              `json:"message"`
+	Meta       *PaginationMeta     `json:"meta,omitempty"`
+	Data       interface{}         `json:"data"`
 }
 
 type PaginationMeta struct {
@@ -28,13 +26,13 @@ type PaginationMeta struct {
 func ResponseSuccess(code int, data interface{}) JSONResult {
 	return JSONResult{
 		Code:       code,
-		StatusCode: common.StatusCodeSuccess,
+		StatusCode: contract.StatusCodeSuccess,
 		Message:    "Success",
 		Data:       data,
 	}
 }
 
-func ResponseFailed(httpCode int, statusCode common.StatusCode, message string, data interface{}) JSONResult {
+func ResponseFailed(httpCode int, statusCode contract.StatusCode, message string, data interface{}) JSONResult {
 	return JSONResult{
 		Code:       httpCode,
 		StatusCode: statusCode,
@@ -46,7 +44,7 @@ func ResponseFailed(httpCode int, statusCode common.StatusCode, message string, 
 func ResponsePagination(page int, limit int, count int, total int, data interface{}, metaData interface{}) JSONResult {
 	return JSONResult{
 		Code:       http.StatusOK,
-		StatusCode: common.StatusCodeSuccess,
+		StatusCode: contract.StatusCodeSuccess,
 		Message:    "Success",
 		Data:       data,
 		Meta: &PaginationMeta{
@@ -56,17 +54,5 @@ func ResponsePagination(page int, limit int, count int, total int, data interfac
 			TotalPage:       int(math.Ceil(float64(total) / float64(limit))),
 			MetaData:        metaData,
 		},
-	}
-}
-
-func ResponseRecover(l *zap.Logger) fiber.ErrorHandler {
-	return func(ctx *fiber.Ctx, err error) error {
-		l.Error("Unexpected error", zap.Error(err), zap.String("method", ctx.Method()), zap.String("url", ctx.Path()))
-		return ctx.Status(fiber.StatusInternalServerError).
-			JSON(JSONResult{
-				Code:       fiber.StatusInternalServerError,
-				StatusCode: common.StatusCodeInternalServerError,
-				Message:    "Internal server error",
-			})
 	}
 }
