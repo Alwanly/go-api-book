@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 
-	"github.com/Alwanly/go-codebase/pkg/config"
+	"github.com/Alwanly/go-codebase/config"
 	"github.com/Alwanly/go-codebase/pkg/database"
 	"github.com/Alwanly/go-codebase/pkg/deps"
 	"github.com/Alwanly/go-codebase/pkg/middleware"

@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Alwanly/go-codebase/config"
 	"github.com/Alwanly/go-codebase/pkg/authentication"
-	"github.com/Alwanly/go-codebase/pkg/config"
 	"github.com/Alwanly/go-codebase/pkg/database"
 	"github.com/Alwanly/go-codebase/pkg/logger"
 	"github.com/Alwanly/go-codebase/pkg/middleware"

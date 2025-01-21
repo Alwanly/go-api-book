@@ -1,7 +1,7 @@
 package deps
 
 import (
-	"github.com/Alwanly/go-codebase/pkg/config"
+	"github.com/Alwanly/go-codebase/config"
 	"github.com/Alwanly/go-codebase/pkg/database"
 	"github.com/Alwanly/go-codebase/pkg/middleware"
 	"github.com/Alwanly/go-codebase/pkg/redis"

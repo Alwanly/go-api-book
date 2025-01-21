@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Alwanly/go-codebase/config"
 	"github.com/Alwanly/go-codebase/internal/book/repository"
 	"github.com/Alwanly/go-codebase/internal/book/schema"
 	"github.com/Alwanly/go-codebase/model"
-	"github.com/Alwanly/go-codebase/pkg/config"
 	"github.com/Alwanly/go-codebase/pkg/contract"
 	"github.com/Alwanly/go-codebase/pkg/wrapper"
 	"github.com/google/uuid"

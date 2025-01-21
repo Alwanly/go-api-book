@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Alwanly/go-codebase/config"
 	"github.com/Alwanly/go-codebase/internal/user/repository"
 	"github.com/Alwanly/go-codebase/internal/user/schema"
 	"github.com/Alwanly/go-codebase/model"
 	"github.com/Alwanly/go-codebase/pkg/authentication"
-	"github.com/Alwanly/go-codebase/pkg/config"
 	"github.com/Alwanly/go-codebase/pkg/contract"
 	"github.com/Alwanly/go-codebase/pkg/logger"
 	"github.com/Alwanly/go-codebase/pkg/wrapper"

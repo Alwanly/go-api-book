@@ -2,7 +2,10 @@ module github.com/Alwanly/go-codebase
 
 go 1.23
 
-replace github.com/Alwanly/go-codebase/pkg => ./pkg
+replace (
+	github.com/Alwanly/go-codebase/config => ./config
+	github.com/Alwanly/go-codebase/pkg => ./pkg
+)
 
 require (
 	github.com/go-playground/locales v0.14.1
