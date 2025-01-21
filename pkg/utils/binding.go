@@ -1,8 +1,12 @@
 package utils
 
 import (
-	"go-codebase/pkg/logger"
 	"net/http"
+	"reflect"
+
+	"github.com/Alwanly/go-codebase/pkg/common"
+	"github.com/Alwanly/go-codebase/pkg/logger"
+	"github.com/Alwanly/go-codebase/pkg/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
@@ -88,12 +92,21 @@ func BindModel(log *zap.Logger, c *fiber.Ctx, m interface{}, sources ...BindingS
 	for _, source := range sources {
 		// execute binding
 		if err := source(binder); err != nil {
-			result := ResponseFailed(http.StatusBadRequest, StatusCodeBindingFailed, ErrorValidatePayload, nil)
+			result := ResponseFailed(http.StatusBadRequest, common.StatusCodeBindingFailed, common.ErrorValidatePayload, nil)
 			return &ModelBindingError{
 				Code:         result.Code,
 				ResponseBody: result,
 			}
 		}
 	}
+
+	// check if the target has AuthUserData field and set it
+	if authUser, ok := c.Locals(middleware.LocalTokenKey).(*middleware.AuthUserData); ok {
+		dataField := reflect.Indirect(reflect.ValueOf(m)).FieldByName("AuthUserData")
+		if dataField.IsValid() && dataField.CanSet() {
+			dataField.Set(reflect.ValueOf(authUser))
+		}
+	}
+
 	return nil
 }

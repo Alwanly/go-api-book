@@ -3,14 +3,16 @@ package database
 import (
 	"context"
 	"fmt"
-	"go-codebase/pkg/logger"
-	"go-codebase/pkg/utils"
+
 	"math"
 	"time"
 
+	"github.com/Alwanly/go-codebase/pkg/logger"
+	"github.com/Alwanly/go-codebase/pkg/utils"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 const (
@@ -27,7 +29,7 @@ const (
 func NewPostgres(opts *DBServiceOpts) (*DBService, error) {
 	l := logger.WithId(opts.Logger, ContextName, "NewPostgres")
 
-	if opts.postgresUri == nil {
+	if opts.PostgresUri == nil {
 		l.Debug("Postgres URI is not set, skipping")
 		return nil, nil
 	}
@@ -43,8 +45,15 @@ func NewPostgres(opts *DBServiceOpts) (*DBService, error) {
 		PrepareStmt: true,
 	}
 
+	queryLogger := logger.WithId(opts.Logger, ContextName, "ExecuteQuery")
+	if opts.Debug {
+		gormOpts.Logger = NewGormLogger(queryLogger, gormlogger.Info, true)
+	} else {
+		gormOpts.Logger = NewGormLogger(queryLogger, gormlogger.Warn, false)
+	}
+
 	dialector := postgres.New(postgres.Config{
-		DSN:                  *opts.postgresUri,
+		DSN:                  *opts.PostgresUri,
 		PreferSimpleProtocol: true,
 	})
 

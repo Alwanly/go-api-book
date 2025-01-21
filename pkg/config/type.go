@@ -14,13 +14,20 @@ type GlobalConfig struct {
 	// Authentication
 	BasicAuthUsername string `mapstructure:"BASIC_AUTH_USERNAME"`
 	BasicAuthPassword string `mapstructure:"BASIC_AUTH_PASSWORD"`
-	JwtPublicKey      string `mapstructure:"JWT_PUBLIC_KEY"`
-	JwtPrivateKey     string `mapstructure:"JWT_PRIVATE_KEY"`
 	JwtIssuer         string `mapstructure:"JWT_ISSUER"`
 	JwtAudience       string `mapstructure:"JWT_AUDIENCE"`
+	JwtExpirationTime int    `mapstructure:"JWT_EXPIRATION"`
+	JwtRefreshTime    int    `mapstructure:"JWT_REFRESH_EXPIRATION"`
+
+	// RSA keys
+	PublicKey  string `mapstructure:"PUBLIC_KEY"`
+	PrivateKey string `mapstructure:"PRIVATE_KEY"`
 
 	// Database
 	PostgresUri                string `mapstructure:"POSTGRES_URI"`
 	PostgresMaxOpenConnections int    `mapstructure:"POSTGRES_MAX_OPEN_CONNECTIONS"`
 	PostgresMaxIdleConnections int    `mapstructure:"POSTGRES_MAX_IDLE_CONNECTIONS"`
+
+	// Redis
+	RedisUri string `mapstructure:"REDIS_URI"`
 }

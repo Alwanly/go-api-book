@@ -27,7 +27,7 @@ type DBServiceOpts struct {
 	Logger *zap.Logger
 
 	// PostgresSQL database connection strings (DSNs)
-	postgresUri *string
+	PostgresUri *string
 	// Maximum number of open connections to the database. Default is 10.
 	PostgresMaxOpenConnections int
 	// Maximum number of idle connections to the database. Default is 5.
@@ -124,12 +124,4 @@ type IDBService interface {
 
 	// Close closes the database connection.
 	Close() error
-}
-
-// set config for uri
-func SetPostgresUri(uri string) OptFunc {
-	return func(opts *DBServiceOpts) error {
-		opts.postgresUri = &uri
-		return nil
-	}
 }

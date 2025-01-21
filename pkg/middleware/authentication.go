@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"go-codebase/pkg/authentication"
-	"go-codebase/pkg/utils"
+	"net/http"
 	"strings"
 
+	"github.com/Alwanly/go-codebase/pkg/authentication"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,35 +22,27 @@ type AuthMiddleware struct {
 }
 
 type authOpts struct {
-	secret         string
-	expirationTime int
-	refreshTime    int
-	issuer         string
-	audience       string
-
-	// Basic Auth
-	username string
-	password string
+	*authentication.JWTConfig
+	*authentication.BasicAuthTConfig
 }
 
 type AuthConfig func(*authOpts)
 
-type AuthToken authentication.JWTClaims
+type AuthUserData struct {
+	UserId string `json:"userId"`
+}
 
-func SetJwtAuth(jwtConfig authentication.JWTConfig) AuthConfig {
+const LocalTokenKey = "user"
+
+func SetJwtAuth(jwtConfig *authentication.JWTConfig) AuthConfig {
 	return func(o *authOpts) {
-		o.secret = jwtConfig.Secret
-		o.expirationTime = jwtConfig.ExpirationTime
-		o.refreshTime = jwtConfig.RefreshTime
-		o.issuer = jwtConfig.Issuer
-		o.audience = jwtConfig.Audience
+		o.JWTConfig = jwtConfig
 	}
 }
 
-func SetBasicAuth(basicAuthConfig authentication.BasicAuthTConfig) AuthConfig {
+func SetBasicAuth(basicAuthConfig *authentication.BasicAuthTConfig) AuthConfig {
 	return func(o *authOpts) {
-		o.username = basicAuthConfig.Username
-		o.password = basicAuthConfig.Password
+		o.BasicAuthTConfig = basicAuthConfig
 	}
 }
 
@@ -60,22 +52,9 @@ func NewAuthMiddleware(opts ...AuthConfig) *AuthMiddleware {
 		opt(&o)
 	}
 
-	jwtOpts := &authentication.JWTConfig{
-		Secret:         o.secret,
-		ExpirationTime: o.expirationTime,
-		RefreshTime:    o.refreshTime,
-		Issuer:         o.issuer,
-		Audience:       o.audience,
-	}
+	jwtAuth := authentication.NewJWTService(o.JWTConfig)
 
-	jwtAuth := authentication.NewJWTService(jwtOpts)
-
-	// basic auth
-	basicAuthOpts := &authentication.BasicAuthTConfig{
-		Username: o.username,
-		Password: o.password,
-	}
-	basicAuth := authentication.NewBasicAuthService(*basicAuthOpts)
+	basicAuth := authentication.NewBasicAuthService(o.BasicAuthTConfig)
 	return &AuthMiddleware{
 		Jwt:   jwtAuth,
 		Basic: basicAuth,
@@ -88,23 +67,23 @@ func (a *AuthMiddleware) JwtAuth() fiber.Handler {
 		// get token from header
 		token := ctx.Get(fiber.HeaderAuthorization)
 		if !strings.Contains(token, "Bearer") {
-			return utils.ResponseUnauthorized(ctx, "Bearer", "Invalid token")
+			return responseUnauthorized(ctx, "Bearer", "Invalid token")
 		}
 
 		// validate token
 		token = strings.Replace(token, "Bearer ", "", 1)
 		if token == "" {
-			return utils.ResponseUnauthorized(ctx, "Bearer", "Invalid token")
+			return responseUnauthorized(ctx, "Bearer", "Invalid token")
 		}
 
 		// parse token
 		auth, err := a.Jwt.ParseToken(token)
 		if err != nil {
-			return utils.ResponseUnauthorized(ctx, "Bearer", "Invalid token")
+			return responseUnauthorized(ctx, "Bearer", "Invalid token")
 		}
 
 		// set claims to context
-		ctx.Locals("auth", auth)
+		ctx.Locals(LocalTokenKey, decodeAuthToken(*auth))
 
 		return ctx.Next()
 	}
@@ -116,14 +95,31 @@ func (a *AuthMiddleware) BasicAuth() fiber.Handler {
 		// get auth from header
 		auth := ctx.Get(fiber.HeaderAuthorization)
 		if !strings.Contains(auth, "Basic") {
-			return utils.ResponseUnauthorized(ctx, "Basic", "Invalid auth")
+			return responseUnauthorized(ctx, "Basic", "Invalid auth")
 		}
 
 		// decode auth
 		username, password := a.Basic.DecodeFromHeader(auth)
 		if !a.Basic.Validate(username, password) {
-			return utils.ResponseUnauthorized(ctx, "Basic", "Invalid auth")
+			return responseUnauthorized(ctx, "Basic", "Invalid auth")
 		}
 		return ctx.Next()
 	}
+}
+
+func decodeAuthToken(dataClaims authentication.JWTClaims) *AuthUserData {
+	return &AuthUserData{
+		UserId: dataClaims["userId"].(string),
+	}
+}
+
+func responseUnauthorized(c *fiber.Ctx, _ string, message ...string) error {
+	c.Set("WWW-Authenticate", "Basic realm=Restricted")
+	response := fiber.Map{
+		"message": message[0],
+	}
+	if len(message) > 1 {
+		response["statusCode"] = message[1]
+	}
+	return c.Status(http.StatusUnauthorized).JSON(response)
 }

@@ -1,4 +1,4 @@
-package utils
+package common
 
 const (
 	// Common error messages
@@ -26,3 +26,7 @@ const (
 	StatusCodeInternalServerError   = StatusCode("000013")
 	StatusCodeSequenceError         = StatusCode("000014")
 )
+
+func CreateStatusCode(code string) StatusCode {
+	return StatusCode(code)
+}

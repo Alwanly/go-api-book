@@ -40,7 +40,7 @@ type basicAuth struct {
 	password string
 }
 
-func NewBasicAuthService(config BasicAuthTConfig) IBasicAuthService {
+func NewBasicAuthService(config *BasicAuthTConfig) IBasicAuthService {
 	return &basicAuth{
 		username: config.Username,
 		password: config.Password,

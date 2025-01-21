@@ -1,8 +1,11 @@
 package repository
 
 import (
-	"go-codebase/pkg/database"
-	"go-codebase/pkg/redis"
+	"context"
+
+	"github.com/Alwanly/go-codebase/model"
+	"github.com/Alwanly/go-codebase/pkg/database"
+	"github.com/Alwanly/go-codebase/pkg/redis"
 )
 
 const ContextName = "Internal.User.Repository"
@@ -14,8 +17,8 @@ type (
 	}
 
 	IRepository interface {
-		// Define methods for the repository
-		ExampleMethod() error
+		Login(ctx context.Context, username string) (*model.User, error)
+		Register(ctx context.Context, model *model.User) (*model.User, error)
 	}
 )
 
@@ -26,6 +29,27 @@ func NewRepository(r Repository) IRepository {
 	}
 }
 
-func (r *Repository) ExampleMethod() error {
-	return nil
+func (r *Repository) Login(ctx context.Context, username string) (*model.User, error) {
+	tx := r.DB.GetTransaction(ctx)
+
+	var model model.User
+	cmd := tx.Where("username = ?", username).First(&model).Error
+	if cmd != nil {
+		return nil, cmd
+	}
+
+	tx.Commit()
+
+	return &model, nil
+}
+
+func (r *Repository) Register(ctx context.Context, model *model.User) (*model.User, error) {
+	tx := r.DB.GetTransaction(ctx)
+
+	cmd := tx.Create(model).Error
+	if cmd != nil {
+		return nil, cmd
+	}
+
+	return model, nil
 }

@@ -1,5 +1,15 @@
 package authentication
 
+import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+)
+
 type IJwtService interface {
 	// GenerateToken generates a new JWT token.
 	//
@@ -38,25 +48,13 @@ type IJwtService interface {
 	// Returns:
 	//   - error: error
 	ValidateToken(token string) error
-
-	// GetClaims returns the JWT claims.
-	//
-	// Parameters:
-	//   - claims: JWT claims
-	//
-	// Returns:
-	//   - error: error
-	ValidateClaims(claims JWTClaims) error
 }
 
-type JWTClaims struct {
-	// User ID
-	UserID string `json:"userId"`
-}
-
+type JWTClaims map[string]interface{}
 type JWTConfig struct {
 	// JWT secret
-	Secret string
+	PrivateKey string
+	PublicKey  string
 
 	// JWT expiration time
 	ExpirationTime int
@@ -71,17 +69,19 @@ type JWTConfig struct {
 	Audience string
 }
 
-type jwt struct {
-	secret         string
-	expirationTime int
-	refreshTime    int
+type jwtAuth struct {
+	privateKey     string
+	publicKey      string
 	issuer         string
 	audience       string
+	refreshTime    int
+	expirationTime int
 }
 
 func NewJWTService(opts *JWTConfig) IJwtService {
-	return &jwt{
-		secret:         opts.Secret,
+	return &jwtAuth{
+		privateKey:     opts.PrivateKey,
+		publicKey:      opts.PublicKey,
 		expirationTime: opts.ExpirationTime,
 		refreshTime:    opts.RefreshTime,
 		issuer:         opts.Issuer,
@@ -89,22 +89,113 @@ func NewJWTService(opts *JWTConfig) IJwtService {
 	}
 }
 
-func (j *jwt) GenerateToken(claims JWTClaims) (string, error) {
-	return "", nil
+func (j *jwtAuth) GenerateToken(dataClaims JWTClaims) (string, error) {
+	var tokenString string
+	var privateKey *rsa.PrivateKey
+
+	block, _ := pem.Decode([]byte(j.privateKey))
+	if block == nil {
+		return "", errors.New("invalid private rsa key")
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+
+	// Create the token
+	token := jwt.New(jwt.SigningMethodRS256)
+
+	now := time.Now()
+	exp := now.Add(time.Duration(j.expirationTime) * time.Minute).Unix()
+	// Set claims
+
+	// Set claims
+	claimsMap := jwt.MapClaims{
+		"iss": j.issuer,
+		"aud": j.audience,
+		"exp": exp,
+	}
+
+	for key, value := range dataClaims {
+		claimsMap[key] = value
+	}
+
+	token.Claims = claimsMap
+
+	// Sign the token with the private key
+	tokenString, err = token.SignedString(privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
-func (j *jwt) ParseToken(token string) (*JWTClaims, error) {
-	return nil, nil
+func (j *jwtAuth) ParseToken(tokenString string) (*JWTClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return jwt.ParseRSAPublicKeyFromPEM([]byte(j.publicKey))
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		jwtClaims := JWTClaims{}
+		for key, value := range claims {
+			jwtClaims[key] = value
+		}
+		return &jwtClaims, nil
+	}
+
+	return nil, errors.New("invalid token")
 }
 
-func (j *jwt) RefreshToken(token string) (string, error) {
-	return "", nil
+func (j *jwtAuth) RefreshToken(tokenString string) (string, error) {
+	var privateKey *rsa.PrivateKey
+	block, _ := pem.Decode([]byte(j.privateKey))
+	if block == nil {
+		return "", errors.New("invalid private rsa key")
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+
+	claims, err := j.ParseToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+
+	// Create a new claims map and copy existing claims
+	newClaims := jwt.MapClaims{
+		"iss": j.issuer,
+		"aud": j.audience,
+		"exp": time.Now().Add(time.Duration(j.refreshTime) * time.Minute).Unix(),
+	}
+
+	for key, value := range *claims {
+		if key != "exp" { // Avoid copying the old expiration time
+			newClaims[key] = value
+		}
+	}
+
+	newToken := jwt.NewWithClaims(jwt.SigningMethodRS256, newClaims)
+
+	newTokenString, err := newToken.SignedString(privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	return newTokenString, nil
 }
 
-func (j *jwt) ValidateToken(token string) error {
-	return nil
-}
-
-func (j *jwt) ValidateClaims(claims JWTClaims) error {
-	return nil
+func (j *jwtAuth) ValidateToken(tokenString string) error {
+	_, err := j.ParseToken(tokenString)
+	return err
 }

@@ -1,14 +1,18 @@
 package handler
 
 import (
-	"go-codebase/internal/user/repository"
-	"go-codebase/internal/user/usecase"
-	"go-codebase/pkg/deps"
-	"go-codebase/pkg/validator"
-
+	"github.com/Alwanly/go-codebase/internal/user/repository"
+	"github.com/Alwanly/go-codebase/internal/user/schema"
+	"github.com/Alwanly/go-codebase/internal/user/usecase"
+	"github.com/Alwanly/go-codebase/pkg/deps"
+	"github.com/Alwanly/go-codebase/pkg/logger"
+	"github.com/Alwanly/go-codebase/pkg/utils"
+	"github.com/Alwanly/go-codebase/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 )
+
+const ContextName = "Internal.User.Handler"
 
 type (
 	Handler struct {
@@ -36,16 +40,76 @@ func NewHandler(d *deps.App) *Handler {
 		UseCase:   usecase,
 	}
 
-	e := d.Fiber.Group("/user")
-	e.Get("/example", handler.ExampleMethod())
+	e := d.Fiber.Group("/auth/v1")
+	e.Post("/login", d.Auth.BasicAuth(), handler.Login)
+	e.Post("/register", d.Auth.BasicAuth(), handler.Register)
+	e.Get("/profile", d.Auth.JwtAuth(), handler.Profile)
 	return handler
 }
 
-// Define methods for the handler
-func (h *Handler) ExampleMethod() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		// Implement the method
+// Login
+func (h *Handler) Login(c *fiber.Ctx) error {
+	l := logger.WithId(h.Logger, ContextName, "Login")
 
-		return nil
+	// bind model
+	model := &schema.AuthLoginRequest{}
+	if err := utils.BindModel(l, c, model, utils.BindFromBody()); err != nil {
+		perr := err.(*utils.ModelBindingError)
+		return c.Status(perr.Code).JSON(perr.ResponseBody)
 	}
+
+	// validate model
+	if err := utils.ValidateModel(l, h.Validator, model); err != nil {
+		perr := err.(*utils.ModelValidationError)
+		return c.Status(perr.Code).JSON(perr.ResponseBody)
+	}
+
+	// process request
+	response := h.UseCase.Auth(c.UserContext(), model)
+	return c.Status(response.Code).JSON(response)
+
+}
+
+// Register
+func (h *Handler) Register(c *fiber.Ctx) error {
+	l := logger.WithId(h.Logger, ContextName, "Register")
+
+	// bind model
+	model := &schema.AuthRegisterRequest{}
+	if err := utils.BindModel(l, c, model, utils.BindFromBody()); err != nil {
+		perr := err.(*utils.ModelBindingError)
+		return c.Status(perr.Code).JSON(perr.ResponseBody)
+	}
+
+	// validate model
+	if err := utils.ValidateModel(l, h.Validator, model); err != nil {
+		perr := err.(*utils.ModelValidationError)
+		return c.Status(perr.Code).JSON(perr.ResponseBody)
+	}
+
+	// process request
+	response := h.UseCase.Register(c.UserContext(), model)
+	return c.Status(response.Code).JSON(response)
+}
+
+// Register
+func (h *Handler) Profile(c *fiber.Ctx) error {
+	l := logger.WithId(h.Logger, ContextName, "Register")
+
+	// bind model
+	model := &schema.ProfileRequest{}
+	if err := utils.BindModel(l, c, model); err != nil {
+		perr := err.(*utils.ModelBindingError)
+		return c.Status(perr.Code).JSON(perr.ResponseBody)
+	}
+
+	// validate model
+	if err := utils.ValidateModel(l, h.Validator, model); err != nil {
+		perr := err.(*utils.ModelValidationError)
+		return c.Status(perr.Code).JSON(perr.ResponseBody)
+	}
+
+	// process request
+	response := h.UseCase.Profile(c.UserContext(), model)
+	return c.Status(response.Code).JSON(response)
 }

@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"go-codebase/pkg/authentication"
-	"go-codebase/pkg/config"
-	"go-codebase/pkg/database"
-	"go-codebase/pkg/logger"
-	"go-codebase/pkg/middleware"
-	"go-codebase/pkg/redis"
+
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/Alwanly/go-codebase/pkg/authentication"
+	"github.com/Alwanly/go-codebase/pkg/config"
+	"github.com/Alwanly/go-codebase/pkg/database"
+	"github.com/Alwanly/go-codebase/pkg/logger"
+	"github.com/Alwanly/go-codebase/pkg/middleware"
+	"github.com/Alwanly/go-codebase/pkg/redis"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
@@ -32,11 +33,13 @@ func main() {
 
 	// Setup database
 	dbConfig := database.DBServiceOpts{
-		Debug:  cfg.Debug,
-		Logger: globalLogger,
+		Debug:                      cfg.Debug,
+		Logger:                     globalLogger,
+		PostgresUri:                &cfg.PostgresUri,
+		PostgresMaxOpenConnections: cfg.PostgresMaxOpenConnections,
+		PostgresMaxIdleConnections: cfg.PostgresMaxIdleConnections,
 	}
 
-	database.SetPostgresUri(cfg.PostgresUri)
 	db, err := database.NewPostgres(&dbConfig)
 	if err != nil {
 		l.Error("Cannot create database", zap.Error(err))
@@ -46,7 +49,7 @@ func main() {
 	// Setup redis
 	redisConfig := redis.RedisOpts{
 		Logger:   globalLogger,
-		RedisUri: nil,
+		RedisUri: &cfg.RedisUri,
 	}
 	redis, err := redis.NewRedis(&redisConfig)
 	if err != nil {
@@ -55,12 +58,15 @@ func main() {
 	}
 
 	// Setup middleware
-	jwtConfig := middleware.SetJwtAuth(authentication.JWTConfig{
-		Secret:   cfg.JwtPrivateKey,
-		Audience: cfg.JwtAudience,
-		Issuer:   cfg.JwtIssuer,
+	jwtConfig := middleware.SetJwtAuth(&authentication.JWTConfig{
+		PrivateKey:     cfg.PrivateKey,
+		PublicKey:      cfg.PublicKey,
+		Audience:       cfg.JwtAudience,
+		Issuer:         cfg.JwtIssuer,
+		ExpirationTime: cfg.JwtExpirationTime,
+		RefreshTime:    cfg.JwtRefreshTime,
 	})
-	basicAuthConfig := middleware.SetBasicAuth(authentication.BasicAuthTConfig{
+	basicAuthConfig := middleware.SetBasicAuth(&authentication.BasicAuthTConfig{
 		Username: cfg.BasicAuthUsername,
 		Password: cfg.BasicAuthPassword,
 	})
@@ -73,7 +79,7 @@ func main() {
 
 	// Create app
 	app := Bootstrap(&AppDeps{
-		Config: cfg,
+		Config: &cfg,
 		Logger: globalLogger,
 		DB:     db,
 		Redis:  redis,

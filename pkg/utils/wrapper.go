@@ -4,15 +4,17 @@ import (
 	"math"
 	"net/http"
 
+	"github.com/Alwanly/go-codebase/pkg/common"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
 type JSONResult struct {
-	Code       int             `json:"-"`
-	StatusCode StatusCode      `json:"statusCode"`
-	Message    string          `json:"message"`
-	Meta       *PaginationMeta `json:"meta,omitempty"`
-	Data       interface{}     `json:"data"`
+	Code       int               `json:"-"`
+	StatusCode common.StatusCode `json:"statusCode"`
+	Message    string            `json:"message"`
+	Meta       *PaginationMeta   `json:"meta,omitempty"`
+	Data       interface{}       `json:"data"`
 }
 
 type PaginationMeta struct {
@@ -23,20 +25,16 @@ type PaginationMeta struct {
 	MetaData        interface{} `json:"metadata,omitempty"`
 }
 
-func CreateStatusCode(code string) StatusCode {
-	return StatusCode(code)
-}
-
 func ResponseSuccess(code int, data interface{}) JSONResult {
 	return JSONResult{
 		Code:       code,
-		StatusCode: StatusCodeSuccess,
+		StatusCode: common.StatusCodeSuccess,
 		Message:    "Success",
 		Data:       data,
 	}
 }
 
-func ResponseFailed(httpCode int, statusCode StatusCode, message string, data interface{}) JSONResult {
+func ResponseFailed(httpCode int, statusCode common.StatusCode, message string, data interface{}) JSONResult {
 	return JSONResult{
 		Code:       httpCode,
 		StatusCode: statusCode,
@@ -48,7 +46,7 @@ func ResponseFailed(httpCode int, statusCode StatusCode, message string, data in
 func ResponsePagination(page int, limit int, count int, total int, data interface{}, metaData interface{}) JSONResult {
 	return JSONResult{
 		Code:       http.StatusOK,
-		StatusCode: StatusCodeSuccess,
+		StatusCode: common.StatusCodeSuccess,
 		Message:    "Success",
 		Data:       data,
 		Meta: &PaginationMeta{
@@ -61,25 +59,15 @@ func ResponsePagination(page int, limit int, count int, total int, data interfac
 	}
 }
 
-func ResponseUnauthorized(c *fiber.Ctx, challenge string, message ...string) error {
-	c.Set("WWW-Authenticate", "Basic realm=Restricted")
-	response := fiber.Map{
-		"message": message[0],
-	}
-	if len(message) > 1 {
-		response["statusCode"] = message[1]
-	}
-	return c.Status(http.StatusUnauthorized).JSON(response)
-}
+func ResponseRecover(l *zap.Logger) fiber.ErrorHandler {
 
-func ResponseForbidden(c *fiber.Ctx, challenge string, message string) error {
-	return c.Status(http.StatusForbidden).JSON(fiber.Map{
-		"message": message,
-	})
-}
-
-func ResponseInternalServerError(c *fiber.Ctx, message string) error {
-	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-		"message": message,
-	})
+	return func(ctx *fiber.Ctx, err error) error {
+		l.Error("Unexpected error", zap.Error(err), zap.String("method", ctx.Method()), zap.String("url", ctx.Path()))
+		return ctx.Status(fiber.StatusInternalServerError).
+			JSON(JSONResult{
+				Code:       fiber.StatusInternalServerError,
+				StatusCode: common.StatusCodeInternalServerError,
+				Message:    "Internal server error",
+			})
+	}
 }

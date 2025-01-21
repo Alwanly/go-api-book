@@ -2,8 +2,8 @@ package redis
 
 import (
 	"context"
-	"go-codebase/pkg/logger"
 
+	"github.com/Alwanly/go-codebase/pkg/logger"
 	"github.com/go-redis/redis/v9"
 	"go.uber.org/zap"
 )
