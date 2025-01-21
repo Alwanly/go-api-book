@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"fmt"
-	"net"
 	"os"
 
 	"go.elastic.co/ecszap"
@@ -38,22 +36,16 @@ func NewLogger(serviceName string, level string, options ...func(*BuilderOption)
 		option(cfg)
 	}
 
-	// create multiple sync target if UDP logging is enabled
-	syncer := zapcore.AddSync(os.Stdout)
-	if cfg.UDPIP != "" && cfg.UDPPort > 0 {
-		syncer = zapcore.NewMultiWriteSyncer(os.Stdout, newUDPSyncer(cfg.UDPIP, cfg.UDPPort))
-	}
-
 	// create new core with log duplication
 	var core zapcore.Core
 	if cfg.PrettyPrint {
 		// create new console formatter config with colored level
 		config := zap.NewDevelopmentEncoderConfig()
 		config.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		core = zapcore.NewCore(zapcore.NewConsoleEncoder(config), syncer, getLogLevel(level))
+		core = zapcore.NewCore(zapcore.NewConsoleEncoder(config), zapcore.AddSync(os.Stdout), getLogLevel(level))
 	} else {
 		// create new ECS formatter config
-		core = ecszap.NewCore(ecszap.NewDefaultEncoderConfig(), syncer, getLogLevel(level))
+		core = ecszap.NewCore(ecszap.NewDefaultEncoderConfig(), zapcore.AddSync(os.Stdout), getLogLevel(level))
 	}
 
 	// create new log instance
@@ -67,30 +59,8 @@ func WithID(log *zap.Logger, contextName string, scopeName string) *zap.Logger {
 	return log.With(zap.String("context", contextName), zap.String("scope", scopeName))
 }
 
-type UDPSyncer struct {
-	conn *net.UDPConn
-}
-
-func newUDPSyncer(bindIP string, bindPort int) *UDPSyncer {
-	// ResolveUDPAddr returns an address of UDP end point.
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", bindIP, bindPort))
-	if err != nil {
-		fmt.Println("Failed to resolve address", err)
+func WithPrettyPrint() func(*BuilderOption) {
+	return func(o *BuilderOption) {
+		o.PrettyPrint = true
 	}
-
-	// DialUDP connects to the remote address raddr on the network net
-	conn, err := net.DialUDP("udp", nil, addr)
-	if err != nil {
-		fmt.Println("Failed to dial address", err)
-	}
-
-	return &UDPSyncer{conn: conn}
-}
-
-func (s *UDPSyncer) Write(p []byte) (n int, err error) {
-	return s.conn.Write(p)
-}
-
-func (s *UDPSyncer) Sync() error {
-	return nil
 }

@@ -60,6 +60,16 @@ app.log
 # Coverage
 coverage
 
+# Profiles
+profiles/
+
+# Logs
+logs/
+
+# Temp Dir
+tmp/
+
+
 # IDE
 .idea
 

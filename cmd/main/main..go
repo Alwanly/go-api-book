@@ -27,7 +27,9 @@ func main() {
 	}
 
 	// Setup dependencies
-	globalLogger := logger.NewLogger(cfg.ServiceName, cfg.LogLevel)
+	globalLogger := logger.NewLogger(cfg.ServiceName, cfg.LogLevel,
+		logger.WithPrettyPrint(),
+	)
 	l := logger.WithID(globalLogger, "server", "main")
 	l.Info("Starting application")
 

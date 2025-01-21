@@ -1,13 +1,13 @@
 # ---- build, run, and test
 
 run:
-	go run ./cmd/server
+	go run ./cmd/main
 
 dev:
 	air server
 
 build:
-	go build -o ./app ./cmd/server
+	go build -o ./app ./cmd/main
 
 # ---- chore
 
