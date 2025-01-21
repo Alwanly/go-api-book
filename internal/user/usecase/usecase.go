@@ -45,7 +45,7 @@ func NewUseCase(uc UseCase) IUseCase {
 }
 
 func (u *UseCase) Auth(ctx context.Context, req *schema.AuthLoginRequest) utils.JSONResult {
-	l := logger.WithId(u.Logger, ContextName, "Auth")
+	l := logger.WithID(u.Logger, ContextName, "Auth")
 
 	user, err := u.Repository.Login(ctx, req.Username)
 	if err != nil {
@@ -81,7 +81,7 @@ func (u *UseCase) Auth(ctx context.Context, req *schema.AuthLoginRequest) utils.
 }
 
 func (u *UseCase) Register(ctx context.Context, req *schema.AuthRegisterRequest) utils.JSONResult {
-	l := logger.WithId(u.Logger, ContextName, "Register")
+	l := logger.WithID(u.Logger, ContextName, "Register")
 
 	hash, err := authentication.HashPassword(req.Password)
 	if err != nil {
@@ -130,8 +130,8 @@ func (u *UseCase) Register(ctx context.Context, req *schema.AuthRegisterRequest)
 	})
 }
 
-func (u *UseCase) Profile(ctx context.Context, req *schema.ProfileRequest) utils.JSONResult {
-	l := logger.WithId(u.Logger, ContextName, "Profile")
+func (u *UseCase) Profile(_ context.Context, req *schema.ProfileRequest) utils.JSONResult {
+	l := logger.WithID(u.Logger, ContextName, "Profile")
 	l.Info("payload request", zap.Any("request", req))
 	return utils.ResponseSuccess(http.StatusOK, req)
 }

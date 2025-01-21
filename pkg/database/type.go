@@ -27,7 +27,7 @@ type DBServiceOpts struct {
 	Logger *zap.Logger
 
 	// PostgresSQL database connection strings (DSNs)
-	PostgresUri *string
+	PostgresURI *string
 	// Maximum number of open connections to the database. Default is 10.
 	PostgresMaxOpenConnections int
 	// Maximum number of idle connections to the database. Default is 5.

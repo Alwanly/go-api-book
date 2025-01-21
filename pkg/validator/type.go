@@ -12,7 +12,7 @@ type ValidationError struct {
 }
 
 // ValidatorService is a struct that contains a validator and a translator.
-type ValidatorService struct {
+type Service struct {
 	Validate          *validator.Validate
 	Translator        ut.Translator
 	DefaultLocale     string

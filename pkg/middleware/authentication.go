@@ -21,33 +21,34 @@ type AuthMiddleware struct {
 	Basic authentication.IBasicAuthService
 }
 
-type authOpts struct {
-	*authentication.JWTConfig
-	*authentication.BasicAuthTConfig
-}
-
-type AuthConfig func(*authOpts)
+// mockery:ignore
+type AuthConfig func(*AuthOpts)
 
 type AuthUserData struct {
-	UserId string `json:"userId"`
+	UserID string `json:"userId"`
+}
+
+type AuthOpts struct {
+	*authentication.JWTConfig
+	*authentication.BasicAuthTConfig
 }
 
 const LocalTokenKey = "user"
 
 func SetJwtAuth(jwtConfig *authentication.JWTConfig) AuthConfig {
-	return func(o *authOpts) {
+	return func(o *AuthOpts) {
 		o.JWTConfig = jwtConfig
 	}
 }
 
 func SetBasicAuth(basicAuthConfig *authentication.BasicAuthTConfig) AuthConfig {
-	return func(o *authOpts) {
+	return func(o *AuthOpts) {
 		o.BasicAuthTConfig = basicAuthConfig
 	}
 }
 
 func NewAuthMiddleware(opts ...AuthConfig) *AuthMiddleware {
-	var o authOpts
+	var o AuthOpts
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -63,7 +64,6 @@ func NewAuthMiddleware(opts ...AuthConfig) *AuthMiddleware {
 
 func (a *AuthMiddleware) JwtAuth() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-
 		// get token from header
 		token := ctx.Get(fiber.HeaderAuthorization)
 		if !strings.Contains(token, "Bearer") {
@@ -91,7 +91,6 @@ func (a *AuthMiddleware) JwtAuth() fiber.Handler {
 
 func (a *AuthMiddleware) BasicAuth() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-
 		// get auth from header
 		auth := ctx.Get(fiber.HeaderAuthorization)
 		if !strings.Contains(auth, "Basic") {
@@ -109,7 +108,7 @@ func (a *AuthMiddleware) BasicAuth() fiber.Handler {
 
 func decodeAuthToken(dataClaims authentication.JWTClaims) *AuthUserData {
 	return &AuthUserData{
-		UserId: dataClaims["userId"].(string),
+		UserID: dataClaims["userId"].(string),
 	}
 }
 

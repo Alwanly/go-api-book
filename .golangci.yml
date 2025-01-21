@@ -1,0 +1,83 @@
+run:
+  timeout: 5m
+  tests: false
+  include:
+    - internal
+    - pkg
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - unused
+    - ineffassign
+    - typecheck
+    - gofmt
+    - goimports
+    - revive
+    - gocyclo
+    - dupl
+    - goconst
+    - gocritic
+    - misspell
+    - unconvert
+    - nakedret
+    - prealloc
+    - copyloopvar
+    - stylecheck
+    - unparam
+    - lll
+    - rowserrcheck
+    - dogsled
+    - funlen
+    - whitespace
+
+issues:
+  exclude-dirs:
+    - .git
+    - vendor
+    - mocks
+    - cmd
+  exclude-dirs-use-default: false
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - govet
+        - staticcheck
+        - gosimple
+        - unused
+        - ineffassign
+        - typecheck
+        - gofmt
+        - goimports
+        - revive
+        - gocyclo
+        - dupl
+        - goconst
+        - gocritic
+        - misspell
+        - unconvert
+        - nakedret
+        - prealloc
+        - copyloopvar
+        - stylecheck
+        - unparam
+        - lll
+        - rowserrcheck
+        - dogsled
+        - funlen
+        - whitespace
+
+linters-settings:
+  gofmt:
+    simplify: true
+  gocyclo:
+    min-complexity: 15
+  lll:
+    line-length: 150
+  funlen:
+    lines: 100
+    statements: 50

@@ -33,9 +33,9 @@ var (
 	zapgormPackage = filepath.Join("moul.io", "zapgorm2")
 )
 
-func NewGormLogger(zapLogger *zap.Logger, level gormlogger.LogLevel, logSql bool) CustomGormLogger {
+func NewGormLogger(zapLogger *zap.Logger, level gormlogger.LogLevel, logSQL bool) CustomGormLogger {
 	return CustomGormLogger{
-		LogSQL:                    logSql,
+		LogSQL:                    logSQL,
 		ZapLogger:                 zapLogger,
 		LogLevel:                  level,
 		SlowThreshold:             100 * time.Millisecond,

@@ -27,9 +27,9 @@ const (
 )
 
 func NewPostgres(opts *DBServiceOpts) (*DBService, error) {
-	l := logger.WithId(opts.Logger, ContextName, "NewPostgres")
+	l := logger.WithID(opts.Logger, ContextName, "NewPostgres")
 
-	if opts.PostgresUri == nil {
+	if opts.PostgresURI == nil {
 		l.Debug("Postgres URI is not set, skipping")
 		return nil, nil
 	}
@@ -45,7 +45,7 @@ func NewPostgres(opts *DBServiceOpts) (*DBService, error) {
 		PrepareStmt: true,
 	}
 
-	queryLogger := logger.WithId(opts.Logger, ContextName, "ExecuteQuery")
+	queryLogger := logger.WithID(opts.Logger, ContextName, "ExecuteQuery")
 	if opts.Debug {
 		gormOpts.Logger = NewGormLogger(queryLogger, gormlogger.Info, true)
 	} else {
@@ -53,7 +53,7 @@ func NewPostgres(opts *DBServiceOpts) (*DBService, error) {
 	}
 
 	dialector := postgres.New(postgres.Config{
-		DSN:                  *opts.PostgresUri,
+		DSN:                  *opts.PostgresURI,
 		PreferSimpleProtocol: true,
 	})
 

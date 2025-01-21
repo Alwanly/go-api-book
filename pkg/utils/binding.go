@@ -79,7 +79,7 @@ func BindFromHeaders() BindingSource {
 
 func BindModel(log *zap.Logger, c *fiber.Ctx, m interface{}, sources ...BindingSource) error {
 	// create local logger
-	l := logger.WithId(log, ContextName, "BindModel")
+	l := logger.WithID(log, ContextName, "BindModel")
 
 	// create binder instance
 	binder := &Binder{

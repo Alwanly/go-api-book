@@ -28,14 +28,14 @@ func main() {
 
 	// Setup dependencies
 	globalLogger := logger.NewLogger(cfg.ServiceName, cfg.LogLevel)
-	l := logger.WithId(globalLogger, "server", "main")
+	l := logger.WithID(globalLogger, "server", "main")
 	l.Info("Starting application")
 
 	// Setup database
 	dbConfig := database.DBServiceOpts{
 		Debug:                      cfg.Debug,
 		Logger:                     globalLogger,
-		PostgresUri:                &cfg.PostgresUri,
+		PostgresURI:                &cfg.PostgresURI,
 		PostgresMaxOpenConnections: cfg.PostgresMaxOpenConnections,
 		PostgresMaxIdleConnections: cfg.PostgresMaxIdleConnections,
 	}
@@ -47,9 +47,9 @@ func main() {
 	}
 
 	// Setup redis
-	redisConfig := redis.RedisOpts{
+	redisConfig := redis.Opts{
 		Logger:   globalLogger,
-		RedisUri: &cfg.RedisUri,
+		RedisURI: &cfg.RedisURI,
 	}
 	redis, err := redis.NewRedis(&redisConfig)
 	if err != nil {
@@ -101,7 +101,6 @@ func main() {
 
 	// graceful shutdown
 	g.Go(func() error {
-
 		<-gCtx.Done()
 		l.Info("Gracefully shutting down...")
 

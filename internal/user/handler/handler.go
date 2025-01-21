@@ -23,7 +23,6 @@ type (
 )
 
 func NewHandler(d *deps.App) *Handler {
-
 	repository := repository.NewRepository(repository.Repository{
 		DB:    d.DB,
 		Redis: d.Redis,
@@ -49,7 +48,7 @@ func NewHandler(d *deps.App) *Handler {
 
 // Login
 func (h *Handler) Login(c *fiber.Ctx) error {
-	l := logger.WithId(h.Logger, ContextName, "Login")
+	l := logger.WithID(h.Logger, ContextName, "Login")
 
 	// bind model
 	model := &schema.AuthLoginRequest{}
@@ -67,12 +66,11 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 	// process request
 	response := h.UseCase.Auth(c.UserContext(), model)
 	return c.Status(response.Code).JSON(response)
-
 }
 
 // Register
 func (h *Handler) Register(c *fiber.Ctx) error {
-	l := logger.WithId(h.Logger, ContextName, "Register")
+	l := logger.WithID(h.Logger, ContextName, "Register")
 
 	// bind model
 	model := &schema.AuthRegisterRequest{}
@@ -94,7 +92,7 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 
 // Register
 func (h *Handler) Profile(c *fiber.Ctx) error {
-	l := logger.WithId(h.Logger, ContextName, "Register")
+	l := logger.WithID(h.Logger, ContextName, "Register")
 
 	// bind model
 	model := &schema.ProfileRequest{}

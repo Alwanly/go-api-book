@@ -14,21 +14,21 @@ const (
 )
 
 // DBServiceOpts represents the options for configuring the database service.
-type RedisOpts struct {
+type Opts struct {
 	// Debug enables debug mode.
 	Debug bool
 	// Logger is the logger.
 	Logger *zap.Logger
 
 	// Redis database connection string (DSN)
-	RedisUri *string
+	RedisURI *string
 
 	// Application Name (for tracing)
 	ApplicationName *string
 }
 
 // DBService represents the database service.
-type RedisService struct {
+type Service struct {
 	Redis redis.UniversalClient
 }
 

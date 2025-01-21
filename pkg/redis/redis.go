@@ -8,16 +8,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewRedis(opts *RedisOpts) (*RedisService, error) {
-	l := logger.WithId(opts.Logger, ContextName, "NewRedis")
+func NewRedis(opts *Opts) (*Service, error) {
+	l := logger.WithID(opts.Logger, ContextName, "NewRedis")
 
-	if opts.RedisUri == nil {
+	if opts.RedisURI == nil {
 		l.Debug("Redis URI is not set, skipping")
 		return nil, nil
 	}
 
 	// create redis client
-	opt, _ := redis.ParseURL(*opts.RedisUri)
+	opt, _ := redis.ParseURL(*opts.RedisURI)
 	cl := redis.NewClient(opt)
 
 	// setup cancellation
@@ -30,12 +30,12 @@ func NewRedis(opts *RedisOpts) (*RedisService, error) {
 		return nil, res.Err()
 	}
 
-	return &RedisService{
+	return &Service{
 		Redis: cl,
 	}, nil
 }
 
-func (db *RedisService) PingRedis() bool {
+func (db *Service) PingRedis() bool {
 	l := logger.NewLogger(ContextName, "PingRedis")
 	ctx, cancel := context.WithTimeout(context.Background(), PingTimeout)
 	defer cancel()
@@ -47,7 +47,7 @@ func (db *RedisService) PingRedis() bool {
 	return res.Err() == nil
 }
 
-func (db *RedisService) PingRedisWithError() (bool, error) {
+func (db *Service) PingRedisWithError() (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), PingTimeout)
 	defer cancel()
 
@@ -55,10 +55,10 @@ func (db *RedisService) PingRedisWithError() (bool, error) {
 	return res.Err() == nil, res.Err()
 }
 
-func (db *RedisService) CloseRedis() error {
+func (db *Service) CloseRedis() error {
 	return db.Redis.Close()
 }
 
-func (db *RedisService) GetTransaction() (redis.Pipeliner, error) {
+func (db *Service) GetTransaction() (redis.Pipeliner, error) {
 	return db.Redis.TxPipeline(), nil
 }

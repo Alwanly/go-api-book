@@ -8,7 +8,6 @@ import (
 )
 
 func LoadConfig(configName string) (GlobalConfig, error) {
-
 	// Load default config
 	loadDefaults()
 

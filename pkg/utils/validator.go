@@ -20,7 +20,7 @@ func (e *ModelValidationError) Error() string {
 
 func ValidateModel(log *zap.Logger, v validator.IValidatorService, m interface{}) error {
 	// create local logger
-	l := logger.WithId(log, ContextName, "ValidateModelV2")
+	l := logger.WithID(log, ContextName, "ValidateModelV2")
 
 	// try validate model
 	if err := v.ValidateStruct(m); err != nil {

@@ -21,7 +21,7 @@ func NewValidator() (IValidatorService, error) {
 	// register english translator
 	_ = en_translations.RegisterDefaultTranslations(v, trans)
 
-	return &ValidatorService{
+	return &Service{
 		Validate:      v,
 		Translator:    trans,
 		DefaultLocale: "en",
@@ -31,11 +31,11 @@ func NewValidator() (IValidatorService, error) {
 	}, nil
 }
 
-func (s *ValidatorService) ValidateStruct(input interface{}) error {
+func (s *Service) ValidateStruct(input interface{}) error {
 	return s.Validate.Struct(input)
 }
 
-func (s *ValidatorService) TranslateError(err error) []ValidationError {
+func (s *Service) TranslateError(err error) []ValidationError {
 	// check if err is nil
 	if err == nil {
 		return nil
@@ -60,7 +60,7 @@ func (s *ValidatorService) TranslateError(err error) []ValidationError {
 	return errors
 }
 
-func (s *ValidatorService) TranslateToLocale(err error, locale string) []ValidationError {
+func (s *Service) TranslateToLocale(err error, locale string) []ValidationError {
 	// check if err is nil
 	if err == nil {
 		return nil

@@ -60,7 +60,6 @@ func ResponsePagination(page int, limit int, count int, total int, data interfac
 }
 
 func ResponseRecover(l *zap.Logger) fiber.ErrorHandler {
-
 	return func(ctx *fiber.Ctx, err error) error {
 		l.Error("Unexpected error", zap.Error(err), zap.String("method", ctx.Method()), zap.String("url", ctx.Path()))
 		return ctx.Status(fiber.StatusInternalServerError).

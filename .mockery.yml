@@ -1,0 +1,11 @@
+all: true
+testonly: false
+inpackage: false
+with-expecter: true
+dir: mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }}
+packages:
+    github.com/Alwanly/go-codebase:
+        config:
+            recursive: true
+            exclude:
+                - "mocks"

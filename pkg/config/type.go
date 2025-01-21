@@ -24,10 +24,10 @@ type GlobalConfig struct {
 	PrivateKey string `mapstructure:"PRIVATE_KEY"`
 
 	// Database
-	PostgresUri                string `mapstructure:"POSTGRES_URI"`
+	PostgresURI                string `mapstructure:"POSTGRES_URI"`
 	PostgresMaxOpenConnections int    `mapstructure:"POSTGRES_MAX_OPEN_CONNECTIONS"`
 	PostgresMaxIdleConnections int    `mapstructure:"POSTGRES_MAX_IDLE_CONNECTIONS"`
 
 	// Redis
-	RedisUri string `mapstructure:"REDIS_URI"`
+	RedisURI string `mapstructure:"REDIS_URI"`
 }

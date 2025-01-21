@@ -23,7 +23,7 @@ type (
 		Config *config.GlobalConfig
 		Logger *zap.Logger
 		DB     *database.DBService
-		Redis  *redis.RedisService
+		Redis  *redis.Service
 		Auth   *middleware.AuthMiddleware
 	}
 )
@@ -31,7 +31,6 @@ type (
 var inst *deps.App
 
 func Bootstrap(d *AppDeps) *deps.App {
-
 	// create http server
 	e := fiber.New(fiber.Config{
 		DisableStartupMessage: true,

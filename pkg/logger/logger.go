@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type LoggerBuilderOption struct {
+type BuilderOption struct {
 	UDPIP       string
 	UDPPort     int
 	PrettyPrint bool
@@ -31,9 +31,9 @@ func getLogLevel(logLevel string) zap.AtomicLevel {
 	}
 }
 
-func NewLogger(serviceName string, level string, options ...func(*LoggerBuilderOption)) *zap.Logger {
+func NewLogger(serviceName string, level string, options ...func(*BuilderOption)) *zap.Logger {
 	// build config
-	cfg := &LoggerBuilderOption{}
+	cfg := &BuilderOption{}
 	for _, option := range options {
 		option(cfg)
 	}
@@ -63,17 +63,17 @@ func NewLogger(serviceName string, level string, options ...func(*LoggerBuilderO
 	return log
 }
 
-func WithId(log *zap.Logger, contextName string, scopeName string) *zap.Logger {
+func WithID(log *zap.Logger, contextName string, scopeName string) *zap.Logger {
 	return log.With(zap.String("context", contextName), zap.String("scope", scopeName))
 }
 
-type UdpSyncer struct {
+type UDPSyncer struct {
 	conn *net.UDPConn
 }
 
-func newUDPSyncer(bindIp string, bindPort int) *UdpSyncer {
+func newUDPSyncer(bindIP string, bindPort int) *UDPSyncer {
 	// ResolveUDPAddr returns an address of UDP end point.
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", bindIp, bindPort))
+	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", bindIP, bindPort))
 	if err != nil {
 		fmt.Println("Failed to resolve address", err)
 	}
@@ -84,13 +84,13 @@ func newUDPSyncer(bindIp string, bindPort int) *UdpSyncer {
 		fmt.Println("Failed to dial address", err)
 	}
 
-	return &UdpSyncer{conn: conn}
+	return &UDPSyncer{conn: conn}
 }
 
-func (s *UdpSyncer) Write(p []byte) (n int, err error) {
+func (s *UDPSyncer) Write(p []byte) (n int, err error) {
 	return s.conn.Write(p)
 }
 
-func (s *UdpSyncer) Sync() error {
+func (s *UDPSyncer) Sync() error {
 	return nil
 }

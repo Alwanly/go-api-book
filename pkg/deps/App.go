@@ -14,7 +14,7 @@ type App struct {
 	Config    *config.GlobalConfig
 	Logger    *zap.Logger
 	DB        *database.DBService
-	Redis     *redis.RedisService
+	Redis     *redis.Service
 	Auth      *middleware.AuthMiddleware
 	Validator validator.IValidatorService
 
