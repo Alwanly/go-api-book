@@ -14,6 +14,7 @@ This project uses several libraries to facilitate development and ensure code qu
 - **Zap**: A structured logger for Go. It is used for logging application events.
 - **Testify**: A testing toolkit for Go. It is used for writing unit tests.
 - **Mockery**: A mock code auto-generator for Go. It is used for generating mocks for testing.
+- **Swagger**: A 
 
 ## Project Structure
 
@@ -42,3 +43,13 @@ go-codebase/
 │
 └── README.md           # Project documentation
 ```
+
+## Generating Documentation
+
+To generate API documentation, run the following command:
+
+```sh
+make docs
+```
+
+This will use `swag` to generate Swagger documentation and place it in the `./api` directory.

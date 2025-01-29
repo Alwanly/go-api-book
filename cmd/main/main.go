@@ -18,6 +18,18 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// @title Codebase API Example documentation
+// @version 1.0
+// @description This is a sample server.
+
+// @host localhost:9000
+// @BasePath /
+
+// @securityDefinitions.basic BasicAuth
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
 
 	// load config

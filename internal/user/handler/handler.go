@@ -46,7 +46,15 @@ func NewHandler(d *deps.App) *Handler {
 	return handler
 }
 
-// Login
+// @Summary User Login
+// @Description Authenticate a user and return a token
+// @ID user-login
+// @Accept json
+// @Produce json
+// @Param login body schema.AuthLoginRequest true "Login request"
+// @Security BasicAuth
+// @Success 200 {object} schema.AuthLoginResponse
+// @Router /auth/v1/login [post]
 func (h *Handler) Login(c *fiber.Ctx) error {
 	l := logger.WithID(h.Logger, ContextName, "Login")
 
@@ -68,7 +76,15 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 	return c.Status(response.Code).JSON(response)
 }
 
-// Register
+// @Summary User Registration
+// @Description Register a new user
+// @ID user-register
+// @Accept json
+// @Produce json
+// @Param register body schema.AuthRegisterRequest true "Register request"
+// @Security BasicAuth
+// @Success 201 {object} schema.AuthRegisterResponse
+// @Router /auth/v1/register [post]
 func (h *Handler) Register(c *fiber.Ctx) error {
 	l := logger.WithID(h.Logger, ContextName, "Register")
 

@@ -1,0 +1,97 @@
+basePath: /
+definitions:
+  schema.AuthLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  schema.AuthLoginResponse:
+    properties:
+      refreshToken:
+        type: string
+      token:
+        type: string
+    type: object
+  schema.AuthRegisterRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  schema.AuthRegisterResponse:
+    properties:
+      refreshToken:
+        type: string
+      token:
+        type: string
+    type: object
+host: localhost:9000
+info:
+  contact: {}
+  description: This is a sample server.
+  title: Codebase API Example documentation
+  version: "1.0"
+paths:
+  /auth/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a token
+      operationId: user-login
+      parameters:
+      - description: Login request
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/schema.AuthLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.AuthLoginResponse'
+      security:
+      - BasicAuth: []
+      summary: User Login
+  /auth/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      operationId: user-register
+      parameters:
+      - description: Register request
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/schema.AuthRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schema.AuthRegisterResponse'
+      security:
+      - BasicAuth: []
+      summary: User Registration
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
