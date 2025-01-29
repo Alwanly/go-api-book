@@ -51,6 +51,7 @@ go.work.sum
 /app
 
 # Local ENV
+.env.db
 .env
 *.env
 
